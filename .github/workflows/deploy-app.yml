@@ -1,23 +1,20 @@
-name: Deploy Applications to AWS ECS
+name: Deploy Application
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
     paths:
       - 'frontend/**'
       - 'backend/**'
-      - '.github/workflows/deploy-app.yml'
-
-env:
-  AWS_REGION: ap-south-2
-  ECR_FRONTEND: dev-frontend
-  ECR_BACKEND: dev-backend
+  workflow_dispatch: # Allows manual trigger if needed
 
 jobs:
-  build-and-deploy:
+  deploy-app:
+    name: Build & Deploy Containers
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Configure AWS Credentials
@@ -25,26 +22,38 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ap-south-2
 
       - name: Log in to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: 'true'
 
-      - name: Build, Tag, and Push Frontend Image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
+      # --- FRONTEND BUILD & DEPLOY ---
+      - name: Build & Push Frontend Image
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_FRONTEND:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_FRONTEND:latest ./frontend
-          docker push $ECR_REGISTRY/$ECR_FRONTEND --all-tags
+          docker build -t dev-frontend ./frontend
+          docker tag dev-frontend:latest ${{ steps.login-ecr.outputs.registry }}/dev-frontend:latest
+          docker push ${{ steps.login-ecr.outputs.registry }}/dev-frontend:latest
 
-      - name: Build, Tag, and Push Backend Image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
+      - name: Update ECS Frontend Service
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_BACKEND:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_BACKEND:latest ./backend
-          docker push $ECR_REGISTRY/$ECR_BACKEND --all-tags
+          aws ecs update-service \
+            --cluster dev-ecs-cluster \
+            --service dev-frontend-service \
+            --force-new-deployment \
+            --region ap-south-2
+
+      # --- BACKEND BUILD & DEPLOY ---
+      - name: Build & Push Backend Image
+        run: |
+          docker build -t dev-backend ./backend
+          docker tag dev-backend:latest ${{ steps.login-ecr.outputs.registry }}/dev-backend:latest
+          docker push ${{ steps.login-ecr.outputs.registry }}/dev-backend:latest
+
+      - name: Update ECS Backend Service
+        run: |
+          aws ecs update-service \
+            --cluster dev-ecs-cluster \
+            --service dev-backend-service \
+            --force-new-deployment \
+            --region ap-south-2
