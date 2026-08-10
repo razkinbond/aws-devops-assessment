@@ -25,11 +25,11 @@ resource "aws_ecs_cluster" "main" {
 
 # 3. Security Group for ECS Tasks
 resource "aws_security_group" "ecs_tasks_sg" {
-  name        = "${var.environment}-ecs-tasks-sg"
-  description = "Allow traffic from ALB only"
-  vpc_id      = aws_vpc.main.id
+  name              = "${var.environment}-ecs-tasks-sg"
+  description       = "Allow traffic from ALB only"
+  vpc_id            = aws_vpc.main.id
 
-  depends_on = [aws_vpc.main, aws_security_group.alb_sg]
+  depends_on        = [aws_vpc.main, aws_security_group.alb_sg]
 
   ingress {
     from_port       = 0
@@ -39,10 +39,10 @@ resource "aws_security_group" "ecs_tasks_sg" {
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
   }
 
   tags = { Name = "${var.environment}-ecs-tasks-sg" }
@@ -50,34 +50,34 @@ resource "aws_security_group" "ecs_tasks_sg" {
 
 # 4. IAM Roles for ECS Fargate
 resource "aws_iam_role" "ecs_execution_role" {
-  name = "${var.environment}-ecs-execution-role"
+  name              = "${var.environment}-ecs-execution-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action    = "sts:AssumeRole"
-      Effect    = "Allow"
-      Principal = { Service = "ecs-tasks.amazonaws.com" }
+    Version         = "2012-10-17"
+    Statement       = [{
+      Action        = "sts:AssumeRole"
+      Effect        = "Allow"
+      Principal     = { Service = "ecs-tasks.amazonaws.com" }
     }]
   })
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_execution_policy" {
-  role       = aws_iam_role.ecs_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+  role              = aws_iam_role.ecs_execution_role.name
+  policy_arn        = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 
   depends_on = [aws_iam_role.ecs_execution_role]
 }
 
 resource "aws_iam_role" "ecs_task_role" {
-  name = "${var.environment}-ecs-task-role"
+  name              = "${var.environment}-ecs-task-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action    = "sts:AssumeRole"
-      Effect    = "Allow"
-      Principal = { Service = "ecs-tasks.amazonaws.com" }
+    Version         = "2012-10-17"
+    Statement       = [{
+      Action        = "sts:AssumeRole"
+      Effect        = "Allow"
+      Principal     = { Service = "ecs-tasks.amazonaws.com" }
     }]
   })
 }
