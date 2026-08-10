@@ -152,7 +152,6 @@ We can clearly see the following end-to-end flow:
 4. AWS resources are updated accordingly.
 5. The deployed application becomes available through the load balancer.
 
-This demonstrates both DevOps automation and cloud deployment maturity.
 
 ---
 
