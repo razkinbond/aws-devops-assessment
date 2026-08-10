@@ -3,14 +3,14 @@
 ## 1. Executive Summary
 This project is a production-style cloud application deployment blueprint designed to deliver a full-stack web application to end users through AWS. It combines containerized application services, infrastructure-as-code, and automated CI/CD pipelines to provide a scalable and deployable platform for the real-world use case.
 
-### What this solution delivers?
+> ### What this solution delivers?
 - A user-facing frontend hosted on AWS
 - A backend API connected to a managed PostgreSQL database
 - Secure, private networking for application and data layers
 - Automated image builds and deployment workflows through GitHub Actions
 - Infrastructure provisioning using Terraform for repeatable cloud deployments
 
-### Why it is ready to ship?
+> ### Why it is ready to ship?
 - The application is containerized and cloud-native
 - AWS services are provisioned in a structured and automated way
 - The stack supports public access, private backend services, and data persistence
@@ -80,7 +80,7 @@ The architecture is organized into three distinct layers to clearly represent th
 
 ## 3. Application Deployment Flow
 
-### Frontend and Backend Services
+> ### Frontend and Backend Services
 The project includes two containerized services:
 - Frontend: A Node.js/Express application
 - Backend: A Python/FastAPI application
@@ -101,10 +101,10 @@ This flow demonstrates a practical CI/CD pattern where source changes are turned
 
 ## 4. Infrastructure Deployment Flow
 
-### Infrastructure as Code Approach
+> ### Infrastructure as Code Approach
 The cloud environment is provisioned using Terraform, which ensures that infrastructure is repeatable, version-controlled, and easier to manage than manual AWS setup.
 
-### Infrastructure Components Provisioned
+> ### Infrastructure Components Provisioned
 The Terraform configuration establishes the following core AWS resources:
 - VPC with public and private subnets
 - Internet Gateway and NAT Gateway
@@ -128,16 +128,16 @@ This shows the separation between platform provisioning and application deployme
 
 ## 5. CI/CD Pipeline Design
 
-### Infrastructure Pipeline
-> File: `.github/workflows/deploy-infra.yml`
+> ### Infrastructure Pipeline
+File: `.github/workflows/deploy-infra.yml`
 
 Purpose:
 - Provisions or updates the AWS environment through Terraform
 - Runs on changes under the terraform directory
 - Performs Terraform initialization, planning, and apply
 
-### Application Pipeline
-> File: `.github/workflows/deploy-app.yml`
+> ### Application Pipeline
+File: `.github/workflows/deploy-app.yml`
 
 Purpose:
 - Builds and publishes the frontend and backend container images
