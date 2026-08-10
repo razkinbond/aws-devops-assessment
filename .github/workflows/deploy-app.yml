@@ -1,6 +1,12 @@
 name: Deploy Application
 
 on:
+  workflow_run:
+    workflows: ["Deploy Infrastructure"]
+    types:
+      - completed
+    branches:
+      - main
   push:
     branches:
       - main
@@ -11,6 +17,7 @@ on:
 
 jobs:
   deploy-app:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     name: Build & Deploy Containers
     runs-on: ubuntu-latest
     steps:

@@ -50,14 +50,14 @@ resource "aws_security_group" "ecs_tasks_sg" {
 
 # 4. IAM Roles for ECS Fargate
 resource "aws_iam_role" "ecs_execution_role" {
-  name              = "${var.environment}-ecs-execution-role"
+  name               = "${var.environment}-ecs-execution-role"
 
   assume_role_policy = jsonencode({
-    Version         = "2012-10-17"
-    Statement       = [{
-      Action        = "sts:AssumeRole"
-      Effect        = "Allow"
-      Principal     = { Service = "ecs-tasks.amazonaws.com" }
+    Version          = "2012-10-17"
+    Statement        = [{
+      Action         = "sts:AssumeRole"
+      Effect         = "Allow"
+      Principal      = { Service = "ecs-tasks.amazonaws.com" }
     }]
   })
 }
