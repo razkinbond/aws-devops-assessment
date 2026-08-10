@@ -38,11 +38,11 @@ resource "aws_lb" "main" {
 
 # 3. Target Groups
 resource "aws_lb_target_group" "frontend_tg" {
-  name        = "${var.environment}-frontend-tg"
-  port        = 3000
-  protocol    = "HTTP"
-  vpc_id      = aws_vpc.main.id
-  target_type = "ip"
+  name              = "${var.environment}-frontend-tg"
+  port              = 3000
+  protocol          = "HTTP"
+  vpc_id            = aws_vpc.main.id
+  target_type       = "ip"
 
   depends_on = [aws_vpc.main]
 
@@ -59,11 +59,11 @@ resource "aws_lb_target_group" "frontend_tg" {
 }
 
 resource "aws_lb_target_group" "backend_tg" {
-  name        = "${var.environment}-backend-tg"
-  port        = 8000
-  protocol    = "HTTP"
-  vpc_id      = aws_vpc.main.id
-  target_type = "ip"
+  name              = "${var.environment}-backend-tg"
+  port              = 8000
+  protocol          = "HTTP"
+  vpc_id            = aws_vpc.main.id
+  target_type       = "ip"
 
   depends_on = [aws_vpc.main]
 
