@@ -16,6 +16,11 @@ resource "aws_ecr_repository" "backend" {
 # 2. ECS Cluster
 resource "aws_ecs_cluster" "main" {
   name = "${var.environment}-ecs-cluster"
+
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
 }
 
 # 3. Security Group for ECS Tasks
@@ -23,8 +28,8 @@ resource "aws_security_group" "ecs_tasks_sg" {
   name        = "${var.environment}-ecs-tasks-sg"
   description = "Allow traffic from ALB only"
   vpc_id      = aws_vpc.main.id
-  
-  depends_on  = [aws_vpc.main, aws_security_group.alb_sg]
+
+  depends_on = [aws_vpc.main, aws_security_group.alb_sg]
 
   ingress {
     from_port       = 0
@@ -60,7 +65,7 @@ resource "aws_iam_role" "ecs_execution_role" {
 resource "aws_iam_role_policy_attachment" "ecs_execution_policy" {
   role       = aws_iam_role.ecs_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-  
+
   depends_on = [aws_iam_role.ecs_execution_role]
 }
 
@@ -108,6 +113,14 @@ resource "aws_ecs_task_definition" "frontend" {
       environment = [
         { name = "PORT", value = "3000" }
       ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.frontend.name
+          awslogs-region        = var.aws_region
+          awslogs-stream-prefix = "frontend"
+        }
+      }
     }
   ])
 }
@@ -173,6 +186,14 @@ resource "aws_ecs_task_definition" "backend" {
         { name = "PORT", value = "8000" },
         { name = "DB_HOST", value = aws_db_instance.postgres.address }
       ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.backend.name
+          awslogs-region        = var.aws_region
+          awslogs-stream-prefix = "backend"
+        }
+      }
     }
   ])
 }

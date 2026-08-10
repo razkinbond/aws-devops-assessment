@@ -159,6 +159,7 @@ Infrastructure is provisioned through Terraform using a declarative model.
 - Enable encryption at rest for persistent data and container artifacts
 - Add WAF protection in front of the ALB
 - Introduce staging and production environments with approval gates
+- Add CloudWatch alarms and SNS notifications for proactive monitoring
 
 ---
 
@@ -191,7 +192,8 @@ Infrastructure is provisioned through Terraform using a declarative model.
 - Add automated deployment execution for ECS updates
 - Add Terraform apply into the release workflow
 - Add environment promotion for dev/staging/prod
-- Add monitoring, logging, and alerting for production operations
+- Expand monitoring, logging, and alerting for production operations
+- Connect the SNS topic to an incident channel or email distribution list
 
 ---
 

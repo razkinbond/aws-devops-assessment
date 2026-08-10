@@ -42,3 +42,15 @@ variable "container_memory" {
   type        = string
   description = "Memory for ECS tasks in MB"
 }
+
+variable "alert_enabled" {
+  type        = bool
+  description = "Create CloudWatch alarms and SNS notifications"
+  default     = true
+}
+
+variable "alert_email" {
+  type        = string
+  description = "Email address for CloudWatch alarm notifications"
+  default     = ""
+}

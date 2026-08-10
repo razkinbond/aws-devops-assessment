@@ -3,8 +3,8 @@ resource "aws_security_group" "rds_sg" {
   name        = "${var.environment}-rds-sg"
   description = "Allow inbound database connections from App layer"
   vpc_id      = aws_vpc.main.id
-  
-  depends_on  = [aws_vpc.main, aws_subnet.private_app_1, aws_subnet.private_app_2]
+
+  depends_on = [aws_vpc.main, aws_subnet.private_app_1, aws_subnet.private_app_2]
 
   ingress {
     from_port   = 5432
@@ -27,9 +27,9 @@ resource "aws_security_group" "rds_sg" {
 resource "aws_db_subnet_group" "rds_subnet_group" {
   name       = "${var.environment}-db-subnet-group"
   subnet_ids = [aws_subnet.private_db_1.id, aws_subnet.private_db_2.id]
-  
+
   depends_on = [aws_subnet.private_db_1, aws_subnet.private_db_2]
-  tags = { Name = "${var.environment}-db-subnet-group" }
+  tags       = { Name = "${var.environment}-db-subnet-group" }
 }
 
 # RDS PostgreSQL Instance

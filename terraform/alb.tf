@@ -3,8 +3,8 @@ resource "aws_security_group" "alb_sg" {
   name        = "${var.environment}-alb-sg"
   description = "Allow public HTTP traffic to ALB"
   vpc_id      = aws_vpc.main.id
-  
-  depends_on  = [aws_vpc.main]
+
+  depends_on = [aws_vpc.main]
 
   ingress {
     from_port   = 80
@@ -30,8 +30,8 @@ resource "aws_lb" "main" {
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
   subnets            = [aws_subnet.public_1.id, aws_subnet.public_2.id]
-  
-  depends_on         = [aws_internet_gateway.gw, aws_subnet.public_1, aws_subnet.public_2, aws_security_group.alb_sg]
+
+  depends_on = [aws_internet_gateway.gw, aws_subnet.public_1, aws_subnet.public_2, aws_security_group.alb_sg]
 
   tags = { Name = "${var.environment}-alb" }
 }
@@ -43,8 +43,8 @@ resource "aws_lb_target_group" "frontend_tg" {
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "ip"
-  
-  depends_on  = [aws_vpc.main]
+
+  depends_on = [aws_vpc.main]
 
   health_check {
     path                = "/"
@@ -64,8 +64,8 @@ resource "aws_lb_target_group" "backend_tg" {
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "ip"
-  
-  depends_on  = [aws_vpc.main]
+
+  depends_on = [aws_vpc.main]
 
   health_check {
     path                = "/health"
@@ -84,8 +84,8 @@ resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
   port              = "80"
   protocol          = "HTTP"
-  
-  depends_on        = [aws_lb.main, aws_lb_target_group.frontend_tg]
+
+  depends_on = [aws_lb.main, aws_lb_target_group.frontend_tg]
 
   default_action {
     type             = "forward"
@@ -96,8 +96,8 @@ resource "aws_lb_listener" "http" {
 resource "aws_lb_listener_rule" "backend_rule" {
   listener_arn = aws_lb_listener.http.arn
   priority     = 10
-  
-  depends_on   = [aws_lb_listener.http, aws_lb_target_group.backend_tg]
+
+  depends_on = [aws_lb_listener.http, aws_lb_target_group.backend_tg]
 
   action {
     type             = "forward"

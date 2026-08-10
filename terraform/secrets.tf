@@ -13,7 +13,7 @@ resource "aws_secretsmanager_secret" "db_secret" {
 
 # 3. Storing DB credentials inside the Secret
 resource "aws_secretsmanager_secret_version" "db_secret_val" {
-  secret_id     = aws_secretsmanager_secret.db_secret.id
+  secret_id = aws_secretsmanager_secret.db_secret.id
   secret_string = jsonencode({
     username = var.db_username
     password = random_password.db_password.result
