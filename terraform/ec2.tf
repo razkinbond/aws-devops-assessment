@@ -1,13 +1,13 @@
 # Automatically query the latest Amazon Linux 2023 AMI for your region
 data "aws_ssm_parameter" "al2023_ami" {
-  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+  name              = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
 # 1. Security Group for EC2 App Instances
 resource "aws_security_group" "ec2_sg" {
-  name        = "${var.environment}-ec2-sg"
-  description = "Allow traffic from ALB"
-  vpc_id      = aws_vpc.main.id
+  name              = "${var.environment}-ec2-sg"
+  description       = "Allow traffic from ALB"
+  vpc_id            = aws_vpc.main.id
 
   # Explicitly wait for VPC and ALB Security Group to exist
   depends_on = [
@@ -23,10 +23,10 @@ resource "aws_security_group" "ec2_sg" {
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
   }
 
   tags = { Name = "${var.environment}-ec2-sg" }
@@ -34,30 +34,30 @@ resource "aws_security_group" "ec2_sg" {
 
 # 2. IAM Role for EC2 Systems Manager (SSM)
 resource "aws_iam_role" "ec2_role" {
-  name = "${var.environment}-ec2-role"
+  name               = "${var.environment}-ec2-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action    = "sts:AssumeRole"
-      Effect    = "Allow"
-      Principal = { Service = "ec2.amazonaws.com" }
+    Version          = "2012-10-17"
+    Statement        = [{
+      Action         = "sts:AssumeRole"
+      Effect         = "Allow"
+      Principal      = { Service = "ec2.amazonaws.com" }
     }]
   })
 }
 
 # 3. Attach SSM Managed Policy to IAM Role
 resource "aws_iam_role_policy_attachment" "ec2_ssm_policy" {
-  role       = aws_iam_role.ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  role               = aws_iam_role.ec2_role.name
+  policy_arn         = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 
   depends_on = [aws_iam_role.ec2_role]
 }
 
 # 4. Instance Profile for EC2
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "${var.environment}-ec2-instance-profile"
-  role = aws_iam_role.ec2_role.name
+  name               = "${var.environment}-ec2-instance-profile"
+  role               = aws_iam_role.ec2_role.name
 
   # Must wait for policy attachment to finish so EC2 boots with SSM enabled
   depends_on = [aws_iam_role_policy_attachment.ec2_ssm_policy]
