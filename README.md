@@ -69,7 +69,7 @@ The architecture is organized into three distinct layers to clearly represent th
 - Application Layer: hosts the frontend and backend applications as containerized services on ECS Fargate.
 - CI/CD Layer: automates the build, packaging, deployment, and rollout process through GitHub Actions and Terraform.
 
-> ### How this diagram maps to the actual project
+> ### How this diagram maps to the actual project?
 - The frontend and backend containers are deployed through ECS services.
 - The Application Load Balancer exposes the services to end users.
 - The database is not directly exposed to the internet and remains in the private layer.
@@ -152,7 +152,6 @@ We can clearly see the following end-to-end flow:
 4. AWS resources are updated accordingly.
 5. The deployed application becomes available through the load balancer.
 
-
 ---
 
 ## 6. AWS Services Used
@@ -175,34 +174,34 @@ We can clearly see the following end-to-end flow:
 
 ## 7. Security and Reliability Considerations
 
-### Security Posture
+> ### Security Posture
 - Public and private application layers are separated through the VPC design.
 - Security groups restrict allowed traffic to required services only.
 - ECS services run with defined IAM permissions.
 - Database resources are placed in private subnets to reduce direct exposure.
 
-### Reliability and Observability
+> ### Reliability and Observability
 - Load balancing helps distribute traffic and improve service resilience.
 - CloudWatch log groups provide runtime diagnostics.
 - SNS-based alerts help monitor service health and failure conditions.
 
-### Key Takeaways
+> ### Key Takeaways
 This implementation reflects a strong foundation for a production-style deployment architecture by combining networking, security, automation, monitoring, and scalability.
 
 ---
 
 ## 8. Rollback and Recovery Strategy
 
-### Application Rollback
+> ### Application Rollback
 - Revert to the previous code version in Git.
 - Rebuild and redeploy the last known-good image from ECR.
 - Trigger a new ECS deployment using the previous image tag.
 
-### Infrastructure Rollback
+> ### Infrastructure Rollback
 - Revert Terraform changes in source control.
 - Apply the earlier configuration to restore the intended infrastructure state.
 
-### Operational value
+> ### Operational value
 This approach allows the platform to recover quickly from deployment issues and supports a safer release process.
 
 ---
