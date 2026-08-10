@@ -43,9 +43,9 @@ resource "aws_subnet" "public_2" {
 
 # 4. Private Subnets for Applications
 resource "aws_subnet" "private_app_1" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.10.0/24"
-  availability_zone = data.aws_availability_zones.available.names[0]
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.10.0/24"
+  availability_zone       = data.aws_availability_zones.available.names[0]
 
   depends_on = [aws_vpc.main]
   tags       = { Name = "${var.environment}-private-app-1" }
