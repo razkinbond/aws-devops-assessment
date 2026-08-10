@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
       <body>
         <div class="card">
           <h1>🚀 AWS DevOps Assessment</h1>
-          <p>Next.js-based application (Frontend) and Python-based application (Backend) deployed on AWS ECS Fargate via GitHub Actions CI/CD</p>
+          <p>Next.js-based application (Frontend) deployed on AWS ECS Fargate via GitHub Actions CI/CD</p>
         </div>
       </body>
     </html>
