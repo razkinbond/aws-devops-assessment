@@ -31,7 +31,9 @@ jobs:
       - name: Terraform Init
         run: |
           cd terraform
-          terraform init
+          echo "AWS region: ap-south-2"
+          aws sts get-caller-identity
+          terraform init -reconfigure -input=false -no-color
 
       - name: Terraform Plan
         run: |
