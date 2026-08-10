@@ -1,7 +1,7 @@
 # AWS DevOps Assessment Deployment Documentation
 
 ## 1. Executive Summary
-This project is a production-style cloud application deployment blueprint designed to deliver a full-stack web application to end users through AWS. It combines containerized application services, infrastructure-as-code, and automated CI/CD pipelines to provide a scalable and deployable platform for real-world use.
+This project is a production-style cloud application deployment blueprint designed to deliver a full-stack web application to end users through AWS. It combines containerized application services, infrastructure-as-code, and automated CI/CD pipelines to provide a scalable and deployable platform for the real-world use case.
 
 ### What this solution delivers
 - A user-facing frontend hosted on AWS
@@ -18,183 +18,204 @@ This project is a production-style cloud application deployment blueprint design
 
 ---
 
-## 2. Production-Ready Architecture at a Glance
+## 2. Architecture Overview
+
+### Reference Architecture Diagram
 
 ```mermaid
-flowchart TD
-    User[End Users] --> ALB[Application Load Balancer]
-    ALB --> Frontend[ECS Fargate Frontend]
-    ALB --> Backend[ECS Fargate Backend API]
-    Backend --> RDS[(RDS PostgreSQL)]
-    GitHub[GitHub Actions] --> ECR[ECR Container Registry]
+flowchart LR
+    subgraph InfrastructureLayer[Infrastructure Layer]
+        VPC[VPC / Subnets / Route Tables]
+        IGW[Internet Gateway]
+        NAT[NAT Gateway]
+        ALB[Application Load Balancer]
+        RDS[(RDS PostgreSQL)]
+        CW[CloudWatch / SNS]
+    end
+
+    subgraph ApplicationLayer[Application Layer]
+        Frontend[ECS Fargate Frontend Service]
+        Backend[ECS Fargate Backend Service]
+    end
+
+    subgraph Cdl[CI/CD Layer]
+        GH[GitHub Actions]
+        TF[Terraform]
+        ECR[Amazon ECR]
+    end
+
+    User[End Users] --> ALB
+    ALB --> Frontend
+    ALB --> Backend
+    Backend --> RDS
+    TF --> VPC
+    TF --> IGW
+    TF --> NAT
+    TF --> ALB
+    TF --> RDS
+    TF --> CW
+    GH --> ECR
     ECR --> Frontend
     ECR --> Backend
-    Terraform[Terraform] --> AWS[AWS Infrastructure]
+    GH --> Frontend
+    GH --> Backend
+    CW --> Monitoring[Monitoring & Alerts]
 ```
 
-### Core platform components
-- Frontend: Node.js/Express
-- Backend: Python/FastAPI
-- Database: Amazon RDS for PostgreSQL
-- Compute: Amazon ECS Fargate
-- Ingress: Application Load Balancer
-- Container registry: Amazon ECR
-- Automation: GitHub Actions + Terraform
+### Architectural Explanation
+The architecture is organized into three distinct layers to clearly represent the solution design:
+
+- Infrastructure Layer: provisions the AWS foundation such as VPC, subnets, route tables, load balancer, RDS, and monitoring services.
+- Application Layer: hosts the frontend and backend applications as containerized services on ECS Fargate.
+- CI/CD Layer: automates the build, packaging, deployment, and rollout process through GitHub Actions and Terraform.
+
+### How this diagram maps to the actual project
+- The frontend and backend containers are deployed through ECS services.
+- The Application Load Balancer exposes the services to end users.
+- The database is not directly exposed to the internet and remains in the private layer.
+- GitHub Actions acts as the CI/CD orchestration layer.
+- Terraform provisions the entire cloud foundation before application deployment begins.
 
 ---
 
-## 3. Repository Deliverables
+## 3. Application Deployment Flow
 
-### Source code repository
-- Contains frontend application code in `frontend/`
-- Contains backend application code in `backend/`
-- Includes deployment and operational configuration for the full solution
+### Frontend and Backend Services
+The project includes two containerized services:
+- Frontend: a Node.js/Express application
+- Backend: a Python/FastAPI application
 
-### Infrastructure code
-- Terraform configuration is organized under `terraform/`
-- Includes VPC, subnets, internet/NAT gateways, ECS, ALB, RDS, IAM, and Secrets Manager
+Both services are packaged into Docker containers and deployed onto ECS Fargate, which provides serverless container execution without managing EC2 instances.
 
-### CI/CD pipeline configuration
-- Application deployment workflow: `.github/workflows/deploy-app.yml`
-- Infrastructure deployment workflow: `.github/workflows/deploy-infra.yml`
+### Deployment Sequence
+1. Developers push code changes to the repository.
+2. GitHub Actions triggers the application workflow.
+3. Docker images are built for the frontend and backend.
+4. Images are pushed to Amazon ECR.
+5. ECS services are updated with a force-new deployment so the new images become active.
+6. The Application Load Balancer routes traffic to the updated services.
 
-### Deployment documentation
-- This document provides the architecture, rollout, and operational guidance for the platform
+This flow demonstrates a practical CI/CD pattern where source changes are turned into deployed AWS application containers automatically.
 
 ---
 
-## 4. AWS Services Used
+## 4. Infrastructure Deployment Flow
+
+### Infrastructure as Code Approach
+The cloud environment is provisioned using Terraform, which ensures that infrastructure is repeatable, version-controlled, and easier to manage than manual AWS setup.
+
+### Infrastructure Components Provisioned
+The Terraform configuration establishes the following core AWS resources:
+- VPC with public and private subnets
+- Internet Gateway and NAT Gateway
+- Route tables and subnet associations
+- ECS cluster and Fargate services
+- Application Load Balancer and target groups
+- ECR repositories for frontend and backend images
+- RDS PostgreSQL database instance in private subnets
+- CloudWatch log groups and SNS-based alerting
+
+### Deployment Sequence
+1. Terraform reads the infrastructure configuration from the repository.
+2. The infrastructure workflow runs in GitHub Actions.
+3. Terraform initializes the backend and validates the configuration.
+4. Terraform creates or updates the required AWS resources.
+5. The infrastructure becomes available for application deployment.
+
+This shows the separation between platform provisioning and application deployment, which is critical in real-world DevOps environments.
+
+---
+
+## 5. CI/CD Pipeline Design
+
+### Infrastructure Pipeline
+File: .github/workflows/deploy-infra.yml
+
+Purpose:
+- provisions or updates the AWS environment through Terraform
+- runs on changes under the terraform directory
+- performs Terraform initialization, planning, and apply
+
+### Application Pipeline
+File: .github/workflows/deploy-app.yml
+
+Purpose:
+- builds and publishes the frontend and backend container images
+- pushes the images to Amazon ECR
+- updates ECS services so new application versions are deployed
+
+### Pipeline Flow for Evaluation
+A reviewer can clearly see the following end-to-end flow:
+1. GitHub repository receives a change.
+2. The relevant GitHub Actions workflow starts.
+3. Infrastructure or application artifacts are produced.
+4. AWS resources are updated accordingly.
+5. The deployed application becomes available through the load balancer.
+
+This demonstrates both DevOps automation and cloud deployment maturity.
+
+---
+
+## 6. AWS Services Used
 
 | Service | Role in the solution |
 |---|---|
 | Amazon VPC | Creates isolated network boundaries for the application and database |
-| Internet Gateway | Enables internet access for public-facing services |
-| NAT Gateway | Allows private resources to communicate outbound securely |
-| Application Load Balancer | Routes traffic to frontend and backend services |
-| Amazon ECS Fargate | Runs the frontend and backend containers without server management |
-| Amazon ECR | Stores and versions application container images |
+| Internet Gateway | Enables internet access for public-facing resources |
+| NAT Gateway | Allows private subnet resources to reach the internet securely |
+| Application Load Balancer | Routes external traffic to the frontend and backend services |
+| Amazon ECS Fargate | Runs the containerized frontend and backend workloads |
+| Amazon ECR | Stores and versions container images |
 | Amazon RDS for PostgreSQL | Provides managed relational database services |
-| AWS Secrets Manager | Stores sensitive configuration such as database credentials |
-| IAM Roles | Secures access for ECS tasks and deployment services |
+| IAM Roles | Grants permissions to ECS tasks and deployment workflows |
+| CloudWatch | Stores logs and monitors system behavior |
+| SNS | Sends alert notifications for monitoring events |
 | S3 | Stores Terraform remote state |
 
 ---
 
-## 5. Deployment Flow
-
-### Application release flow
-1. Code is pushed to the `main` branch.
-2. GitHub Actions detects changes in application folders or workflow files.
-3. The build pipeline authenticates to AWS and logs into ECR.
-4. Frontend and backend images are built and stored in ECR.
-5. The deployed ECS services can consume the updated container images for release.
-
-### Infrastructure rollout flow
-1. Changes in the `terraform/` folder trigger the infrastructure workflow.
-2. Terraform initializes and validates the configuration.
-3. A deployment plan is generated for review.
-4. The provisioning workflow applies the infrastructure changes to AWS.
-
----
-
-## 6. CI/CD Workflow Summary
-
-### Infrastructure pipeline
-File: `.github/workflows/deploy-infra.yml`
-
-Key actions:
-- Triggers on Terraform or workflow changes
-- Sets up Terraform
-- Runs initialization, validation, and planning
-- Prepares the environment for infrastructure changes
-
-### Application pipeline
-File: `.github/workflows/deploy-app.yml`
-
-Key actions:
-- Triggers on push to `main`
-- Builds frontend and backend Docker images
-- Publishes images to Amazon ECR with commit-based tags
-- Uses AWS credentials from GitHub Secrets
-
-
-### Production-readiness note
-This setup already demonstrates a strong DevOps foundation. To move from a solid implementation to a fully production-grade release pipeline, the next step is to add full deployment execution, approval controls, and promotion across environments.
-
----
-
-## 7. Infrastructure Provisioning Approach
-Infrastructure is provisioned through Terraform using a declarative model.
-
-### What is provisioned
-- VPC with public and private subnets
-- Internet Gateway and NAT Gateway
-- Application Load Balancer and routing rules
-- ECS cluster and Fargate services
-- ECR repositories
-- RDS PostgreSQL instance
-- Secrets Manager secret for database credentials
-
-### Why this matters
-- Deployments are repeatable
-- Infrastructure changes are version-controlled
-- The environment can be recreated or scaled consistently
-
----
-
-## 8. Security and Reliability Baseline
+## 7. Security and Reliability Considerations
 
 ### Security posture
-- Private application and database layers reduce direct exposure to the internet
-- Security groups restrict traffic to required paths only
-- ECS services use dedicated IAM roles
-- Sensitive database credentials are managed through AWS Secrets Manager
+- Public and private application layers are separated through the VPC design.
+- Security groups restrict allowed traffic to required services only.
+- ECS services run with defined IAM permissions.
+- Database resources are placed in private subnets to reduce direct exposure.
 
-### Reliability posture
-- Application traffic is distributed through the ALB
-- Health checks support service monitoring and failover decisions
-- Container-based deployment supports rapid updates and recovery
+### Reliability and observability
+- Load balancing helps distribute traffic and improve service resilience.
+- CloudWatch log groups provide runtime diagnostics.
+- SNS-based alerts help monitor service health and failure conditions.
 
-### Recommended production hardening next steps
-- Use GitHub OIDC instead of long-lived AWS access keys
-- Enable encryption at rest for persistent data and container artifacts
-- Add WAF protection in front of the ALB
-- Introduce staging and production environments with approval gates
+### Key takeaways
+This implementation reflects a strong foundation for a production-style deployment architecture by combining networking, security, automation, monitoring, and scalability.
 
 ---
 
-## 9. Rollback and Recovery Strategy
+## 8. Rollback and Recovery Strategy
 
-### Application rollback
-- Revert the application code in Git
-- Rebuild and republish the last known-good image version from ECR
-- Redeploy the previous image tag to ECS
+### Application Rollback
+- Revert to the previous code version in Git.
+- Rebuild and redeploy the last known-good image from ECR.
+- Trigger a new ECS deployment using the previous image tag.
 
-### Infrastructure rollback
-- Revert Terraform changes
-- Re-apply the prior configuration from version control and Terraform state
+### Infrastructure Rollback
+- Revert Terraform changes in source control.
+- Apply the earlier configuration to restore the intended infrastructure state.
 
-### Recovery principle
-- The deployment process is designed so that previous known-good versions can be restored quickly if an issue is detected after release
-
----
-
-## 10. Production Readiness Snapshot
-
-### Ready to be shipped
-- Cloud-native architecture is in place
-- Infrastructure is codified and reusable
-- Application services are containerized and deployable
-- CI/CD automation is already established
-- Security and networking foundations are present
-
-### What remains for full enterprise rollout
-- Add automated deployment execution for ECS updates
-- Add Terraform apply into the release workflow
-- Add environment promotion for dev/staging/prod
-- Add monitoring, logging, and alerting for production operations
+### Operational value
+This approach allows the platform to recover quickly from deployment issues and supports a safer release process.
 
 ---
 
-## 11. Final Release Statement
-This AWS-based deployment solution is structured as a production-ready application platform that can be delivered to users through the cloud. It provides the core building blocks of a real-world release pipeline: scalable architecture, secure networking, managed data services, automated delivery, and infrastructure as code. With a few final hardening steps, it is well-positioned to move from assessment-grade implementation to a fully operational production deployment.
+## 9. Final Summary
+This project presents a complete AWS DevOps implementation that covers the core stages of modern cloud deployment:
+- Provisioning infrastructure with Terraform
+- Packaging applications in containers
+- Storing images in Amazon ECR
+- Deploying services to ECS Fargate
+- Routing traffic through an Application Load Balancer
+- Integrating monitoring and alerting with CloudWatch and SNS
+- Automating the process with GitHub Actions
+
+From a DevOps perspective, this solution demonstrates practical understanding of cloud architecture, automation, infrastructure provisioning, deployment pipelines, and production-oriented system design.
