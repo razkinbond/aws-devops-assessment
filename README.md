@@ -3,14 +3,14 @@
 ## 1. Executive Summary
 This project is a production-style cloud application deployment blueprint designed to deliver a full-stack web application to end users through AWS. It combines containerized application services, infrastructure-as-code, and automated CI/CD pipelines to provide a scalable and deployable platform for the real-world use case.
 
-### What this solution delivers
+### What this solution delivers?
 - A user-facing frontend hosted on AWS
 - A backend API connected to a managed PostgreSQL database
 - Secure, private networking for application and data layers
 - Automated image builds and deployment workflows through GitHub Actions
 - Infrastructure provisioning using Terraform for repeatable cloud deployments
 
-### Why it is ready to ship
+### Why it is ready to ship?
 - The application is containerized and cloud-native
 - AWS services are provisioned in a structured and automated way
 - The stack supports public access, private backend services, and data persistence
@@ -62,14 +62,14 @@ flowchart LR
     CW --> Monitoring[Monitoring & Alerts]
 ```
 
-### Architectural Explanation
+> ### Architectural Explanation
 The architecture is organized into three distinct layers to clearly represent the solution design:
 
 - Infrastructure Layer: provisions the AWS foundation such as VPC, subnets, route tables, load balancer, RDS, and monitoring services.
 - Application Layer: hosts the frontend and backend applications as containerized services on ECS Fargate.
 - CI/CD Layer: automates the build, packaging, deployment, and rollout process through GitHub Actions and Terraform.
 
-### How this diagram maps to the actual project
+> ### How this diagram maps to the actual project
 - The frontend and backend containers are deployed through ECS services.
 - The Application Load Balancer exposes the services to end users.
 - The database is not directly exposed to the internet and remains in the private layer.
@@ -82,12 +82,12 @@ The architecture is organized into three distinct layers to clearly represent th
 
 ### Frontend and Backend Services
 The project includes two containerized services:
-- Frontend: a Node.js/Express application
-- Backend: a Python/FastAPI application
+- Frontend: A Node.js/Express application
+- Backend: A Python/FastAPI application
 
 Both services are packaged into Docker containers and deployed onto ECS Fargate, which provides serverless container execution without managing EC2 instances.
 
-### Deployment Sequence
+> ### Deployment Sequence
 1. Developers push code changes to the repository.
 2. GitHub Actions triggers the application workflow.
 3. Docker images are built for the frontend and backend.
@@ -115,7 +115,7 @@ The Terraform configuration establishes the following core AWS resources:
 - RDS PostgreSQL database instance in private subnets
 - CloudWatch log groups and SNS-based alerting
 
-### Deployment Sequence
+> ### Deployment Sequence
 1. Terraform reads the infrastructure configuration from the repository.
 2. The infrastructure workflow runs in GitHub Actions.
 3. Terraform initializes the backend and validates the configuration.
@@ -129,23 +129,23 @@ This shows the separation between platform provisioning and application deployme
 ## 5. CI/CD Pipeline Design
 
 ### Infrastructure Pipeline
-File: .github/workflows/deploy-infra.yml
+> File: `.github/workflows/deploy-infra.yml`
 
 Purpose:
-- provisions or updates the AWS environment through Terraform
-- runs on changes under the terraform directory
-- performs Terraform initialization, planning, and apply
+- Provisions or updates the AWS environment through Terraform
+- Runs on changes under the terraform directory
+- Performs Terraform initialization, planning, and apply
 
 ### Application Pipeline
-File: .github/workflows/deploy-app.yml
+> File: `.github/workflows/deploy-app.yml`
 
 Purpose:
-- builds and publishes the frontend and backend container images
-- pushes the images to Amazon ECR
-- updates ECS services so new application versions are deployed
+- Builds and publishes the frontend and backend container images
+- Pushes the images to Amazon ECR
+- Updates ECS services so new application versions are deployed
 
-### Pipeline Flow for Evaluation
-A reviewer can clearly see the following end-to-end flow:
+> ### Pipeline Flow for Evaluation
+We can clearly see the following end-to-end flow:
 1. GitHub repository receives a change.
 2. The relevant GitHub Actions workflow starts.
 3. Infrastructure or application artifacts are produced.
@@ -176,18 +176,18 @@ This demonstrates both DevOps automation and cloud deployment maturity.
 
 ## 7. Security and Reliability Considerations
 
-### Security posture
+### Security Posture
 - Public and private application layers are separated through the VPC design.
 - Security groups restrict allowed traffic to required services only.
 - ECS services run with defined IAM permissions.
 - Database resources are placed in private subnets to reduce direct exposure.
 
-### Reliability and observability
+### Reliability and Observability
 - Load balancing helps distribute traffic and improve service resilience.
 - CloudWatch log groups provide runtime diagnostics.
 - SNS-based alerts help monitor service health and failure conditions.
 
-### Key takeaways
+### Key Takeaways
 This implementation reflects a strong foundation for a production-style deployment architecture by combining networking, security, automation, monitoring, and scalability.
 
 ---
@@ -218,4 +218,4 @@ This project presents a complete AWS DevOps implementation that covers the core 
 - Integrating monitoring and alerting with CloudWatch and SNS
 - Automating the process with GitHub Actions
 
-From a DevOps perspective, this solution demonstrates practical understanding of cloud architecture, automation, infrastructure provisioning, deployment pipelines, and production-oriented system design.
+> From a DevOps perspective, this solution demonstrates practical understanding of cloud architecture, automation, infrastructure provisioning, deployment pipelines, and production-oriented system design.
